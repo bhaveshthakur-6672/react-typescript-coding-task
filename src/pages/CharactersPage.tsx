@@ -4,6 +4,7 @@ import { getCharacters } from '../api/rickAndMorty';
 import { Link } from '@tanstack/react-router';
 import Loader from '../components/Loader';
 import { useState } from 'react';
+import type { CharactersResponse, Character } from '../api/types';
 
 export default function CharactersPage() {
   const queryClient = useQueryClient();
@@ -11,13 +12,11 @@ export default function CharactersPage() {
   const navigate = useNavigate({ from: '/characters' });
 
   const [isRefreshing, setIsRefreshing] = useState(false);
-
   const page = parseInt(search.page ?? '1');
 
-  const { data, isLoading, isError, refetch } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery<CharactersResponse>({
     queryKey: ['characters', page],
     queryFn: () => getCharacters(page),
-    keepPreviousData: true,
   });
 
   const setPage = (newPage: number) => {
@@ -43,7 +42,7 @@ export default function CharactersPage() {
       </button>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {data.results.map((character: any) => (
+        {data?.results?.map((character: Character) => (
           <Link
             key={character.id}
             to="/character/$id"
@@ -60,15 +59,15 @@ export default function CharactersPage() {
         <button
           disabled={page === 1}
           onClick={() => setPage(page - 1)}
-          className="bg-gray-200 px-3 py-1 rounded disabled:opacity-50"
+          className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded disabled:opacity-50"
         >
           Previous
         </button>
         <span>Page {page}</span>
         <button
-          disabled={!data.info.next}
+          disabled={!data?.info?.next}
           onClick={() => setPage(page + 1)}
-          className="bg-gray-200 px-3 py-1 rounded disabled:opacity-50"
+          className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded disabled:opacity-50"
         >
           Next
         </button>
