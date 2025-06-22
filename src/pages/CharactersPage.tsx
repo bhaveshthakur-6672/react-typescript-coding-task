@@ -2,15 +2,19 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSearch, useNavigate } from '@tanstack/react-router';
 import { getCharacters } from '../api/rickAndMorty';
 import { Link } from '@tanstack/react-router';
+import Loader from '../components/Loader';
+import { useState } from 'react';
 
 export default function CharactersPage() {
   const queryClient = useQueryClient();
   const search = useSearch({ strict: false });
   const navigate = useNavigate({ from: '/characters' });
 
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
   const page = parseInt(search.page ?? '1');
 
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['characters', page],
     queryFn: () => getCharacters(page),
     keepPreviousData: true,
@@ -20,13 +24,19 @@ export default function CharactersPage() {
     navigate({ search: { page: String(newPage) } });
   };
 
-  if (isLoading) return <p>Loading...</p>;
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await refetch();
+    setIsRefreshing(false);
+  };
+
+  if (isLoading || isRefreshing) return <Loader />;
   if (isError) return <p>Error fetching characters.</p>;
 
   return (
     <div className="space-y-4">
       <button
-        onClick={() => queryClient.invalidateQueries(['characters', page])}
+        onClick={handleRefresh}
         className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
       >
         Refresh Page

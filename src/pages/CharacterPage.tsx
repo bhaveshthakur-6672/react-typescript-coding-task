@@ -2,6 +2,7 @@ import { useParams } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import { getCharacterById } from '../api/rickAndMorty';
 import { Link } from '@tanstack/react-router';
+import Loader from '../components/Loader';
 
 export default function CharacterPage() {
   const { id } = useParams({ strict: false });
@@ -11,7 +12,7 @@ export default function CharacterPage() {
     queryFn: () => getCharacterById(Number(id)),
   });
 
-  if (isLoading) return <p>Loading...</p>;
+  if (isLoading) return <Loader/>;
   if (isError) return <p>Error fetching character.</p>;
 
   return (
